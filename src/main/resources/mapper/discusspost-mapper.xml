@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 这个配置文件是为哪个接口 Mapper服务 要在这里写权限名-->
+<mapper namespace="com.newcoder.community.dao.DiscussPostMapper">
+    <!-- 这里是为了查询字段复用 对应的是下面的include -->
+    <sql id ="selectFields">
+    id,user_id, title, content, type, status, create_time, comment_count, score
+    </sql>
+    <!-- 返回类型是 List<DiscussPost>，集合里装的是 DiscussPost，因为List是java自带的类型可以被检测到，所以只需要申明这个DiscussPost-->
+    <select id="selectDiscussPosts" resultType="DiscussPost">
+        select <include refid="selectFields"></include>
+        from discuss_post
+        where status!=2
+        <if test="userId!=0">
+            and user_id =#{userId}  <!--一个是方法参数 一个是字段-->
+        </if>
+        order by type desc, create_time desc  <!--type表示帖子的类型 1是置顶 0是普通-->
+        limit #{offset}, #{limit}
+    </select>
+    <select id="selectDiscussPostRows" resultType="int">
+        select count(id)
+        from discuss_post
+        where status!=2
+        <if test="userId!=0">
+            and user_id =#{userId}
+        </if>
+    </select>
+</mapper>

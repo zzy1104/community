@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 这个配置文件是为哪个Mapper服务 要在这里写权限名-->
+<mapper namespace="com.newcoder.community.dao.UserMapper">
+
+    <!-- 这里是为了查询字段复用 对应的是下面的include -->
+    <sql id ="selectFields">
+        username, password, salt, email, type, status, activation_code, header_url, create_time
+    </sql>
+    <!-- 这里是为了插入字段复用 -->
+    <sql id="insertFields">
+        id, username, password, salt, email, type, status, activation_code, header_url, create_time
+    </sql>
+    <!-- select标签 （每个标签要对应相应的Mapper的方法，后面要声明查询后返回类型（entity中的User）-->
+    <select id="selectById" resultType="User">
+        select id, username, password, salt, email, type, status, activation_code, header_url, create_time
+        from user
+        <!--id=方法中的id 用#{ } 其实就是吧上面的方法selectById中的参数id嵌入进来了-->
+        where id = #{id}
+    </select>
+    <select id="selectByName" resultType="User">
+        select <include refid="selectFields"></include>
+        from user
+        where username = #{username}
+    </select>
+    <select id="selectByEmail" resultType="User">
+        select <include refid="selectFields"></include>
+        from user
+        where email = #{email}
+    </select>
+
+    <!-- insert标签，parameterType声明参数类型，因为inserUser方法中的User是一个bean 是我们自己创建的，不是java自带的String/int型-->
+    <!-- keyProperty 增加行的时候 mysql会自动生成id mybaties会从mysql中得到这个id 再填入User，需要知道这个id在User中地“名字”-->
+    <insert id="insertUser" parameterType="User" keyProperty="id">
+        <!-- 上面写的是插入字段，字段对应的值 是从参数User中来，写User中的属性-->
+        insert into user (<include refid="insertFields"></include>)
+        values(null,#{username}, #{password}, #{salt}, #{email}, #{type}, #{status}, #{activationCode}, #{headerUrl}, #{createTime})
+    </insert>
+    
+    <update id="updateStatus">
+        update user set status = #{status} where id =#{id}
+    </update>
+    <update id="updateHeader">
+        update user set header_url = #{headerUrl} where id =#{id}
+    </update>
+    <update id="updatePassword">
+        update user set password = #{password} where id =#{id}
+    </update>
+</mapper>
